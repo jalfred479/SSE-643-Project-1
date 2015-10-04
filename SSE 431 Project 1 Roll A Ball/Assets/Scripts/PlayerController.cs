@@ -4,12 +4,14 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
-	public float speed;
+	public float rollSpeed;
+	public float jumpPower;
 	public Text countText;
 	public Text winText;
 
 	private Rigidbody rb;
 	private int count;
+	private float distToGround;
 
 	void Start()
 	{
@@ -17,16 +19,22 @@ public class PlayerController : MonoBehaviour {
 		count = 0;
 		SetCountText ();
 		winText.text = "";
+		distToGround = GetComponent<Collider>().bounds.extents.y;
 	}
 
 	void FixedUpdate()
 	{
-		float moveHorizontal = Input.GetAxis ("Horizontal");
-		float moveVertical = Input.GetAxis ("Vertical");
+		float moveHorizontal = Input.GetAxis ("Horizontal")*rollSpeed;
+		float moveVertical = Input.GetAxis ("Vertical")*rollSpeed;
+		float jump = Input.GetAxis ("Jump")*jumpPower;
+		Vector3 movement;
 
-		Vector3 movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
+		if(Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f))
+			movement = new Vector3 (moveHorizontal, jump, moveVertical);
+		else
+			movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
 
-		rb.AddForce (movement*speed);
+		rb.AddForce (movement);
 	}
 
 	void OnTriggerEnter(Collider other) 
