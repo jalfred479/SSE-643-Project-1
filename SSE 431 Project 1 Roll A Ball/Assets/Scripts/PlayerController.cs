@@ -8,6 +8,10 @@ public class PlayerController : MonoBehaviour {
 	public float jumpPower;
 	public Text countText;
 	public Text winText;
+	public GameObject boundPanel;
+	public Text boundText;
+	public GameObject winPanel;
+	public int totalCollectibles;
 
 	private Rigidbody rb;
 	private int count;
@@ -28,11 +32,13 @@ public class PlayerController : MonoBehaviour {
 		float moveVertical = Input.GetAxis ("Vertical")*rollSpeed;
 		float jump = Input.GetAxis ("Jump")*jumpPower;
 		Vector3 movement;
-
+		Vector3 targetDirection = new Vector3(moveHorizontal, 0f, moveVertical);
+		targetDirection = Camera.main.transform.TransformDirection(targetDirection);
+		targetDirection.y = jump;
 		if(Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f))
-			movement = new Vector3 (moveHorizontal, jump, moveVertical);
+			movement = targetDirection;
 		else
-			movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
+			movement = new Vector3 (targetDirection.x, 0.0f, targetDirection.z);
 
 		rb.AddForce (movement);
 	}
@@ -45,14 +51,22 @@ public class PlayerController : MonoBehaviour {
 			count++;
 			SetCountText();
 		}
+
+		if (other.gameObject.CompareTag ("Boundary")) 
+		{
+			boundPanel.SetActive(true);
+			boundText.text = "You fell off...";
+		}
 	}
 
 	void SetCountText()
 	{
-		countText.text = "Count: " + count.ToString();
-		if (count >= 12) 
+		countText.text = "Count: " + count.ToString() + " of " + totalCollectibles.ToString();
+		if (count >= totalCollectibles) 
 		{
+			winPanel.SetActive(true);
 			winText.text = "You Win!";
 		}
 	}
+
 }
